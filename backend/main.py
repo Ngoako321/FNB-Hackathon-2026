@@ -1,13 +1,17 @@
+
+import logging
+import time
+
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
 from pydantic import BaseModel
 
-from database import Base, engine, SessionLocal, get_db
+from database import Base, engine, SessionLocal
 from models import User, Opportunity, Application
 from schemas import UserRegister, UserResponse, UserLogin, MatchRequest, SkillsUpdate
-import logging 
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,10 +21,10 @@ app = FastAPI(title="LinkU API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5175",
-    "http://127.0.0.1:5175",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -56,29 +60,40 @@ def health_check():
     }
 
 
-
 @app.post(
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
+def register_user(
+    user_data: UserRegister,
+    db: Session = Depends(get_db),
+):
     try:
-        email = str(user_data.email).lower()
+        start = time.perf_counter()
 
-        existing_user = (
-            db.query(User)
-            .filter(User.email == email)
-            .first()
+        email = str(user_data.email).strip().lower()
+
+        user = db.query(User).filter(User.email == email).first()
+
+        logger.info(
+            "Registration user lookup took %.3f seconds",
+            time.perf_counter() - start,
         )
 
-        if existing_user:
+        if user:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="An account with this email already exists.",
             )
 
+        start = time.perf_counter()
         hashed_password = password_hash.hash(user_data.password)
+
+        logger.info(
+            "Registration password hashing took %.3f seconds",
+            time.perf_counter() - start,
+        )
 
         new_user = User(
             full_name=user_data.full_name.strip(),
@@ -86,9 +101,15 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
             hashed_password=hashed_password,
         )
 
+        start = time.perf_counter()
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+
+        logger.info(
+            "Registration database save took %.3f seconds",
+            time.perf_counter() - start,
+        )
 
         return new_user
 
@@ -100,26 +121,46 @@ def register_user(user_data: UserRegister, db: Session = Depends(get_db)):
         logger.exception("Registration failed")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Could not create account. Check the backend terminal.",
+            detail="Could not create account. Check the backend logs.",
         )
 
-@app.post("/login")
-def login_user(login_data: UserLogin, db: Session = Depends(get_db),):
 
+@app.post("/login")
+def login_user(
+    login_data: UserLogin,
+    db: Session = Depends(get_db),
+):
+    start = time.perf_counter()
     email = str(login_data.email).strip().lower()
 
-    user = (
-        db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == email).first()
+
+    logger.info(
+        "Login user lookup took %.3f seconds",
+        time.perf_counter() - start,
     )
 
-    if not user or not password_hash.verify(
-        login_data.password,
-        user.hashed_password,
-    ):
-
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password."
+            detail="Incorrect email or password.",
+        )
+
+    start = time.perf_counter()
+    password_valid = password_hash.verify(
+        login_data.password,
+        user.hashed_password,
+    )
+
+    logger.info(
+        "Login password verification took %.3f seconds",
+        time.perf_counter() - start,
+    )
+
+    if not password_valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password.",
         )
 
     return {
@@ -130,10 +171,15 @@ def login_user(login_data: UserLogin, db: Session = Depends(get_db),):
             "email": user.email,
         },
     }
-    
-@app.get("/opportunities") 
+
+
+@app.get("/opportunities")
 def get_opportunities(db: Session = Depends(get_db)):
-    opportunities = db.query(Opportunity).order_by(Opportunity.id.desc()).all()
+    opportunities = (
+        db.query(Opportunity)
+        .order_by(Opportunity.id.desc())
+        .all()
+    )
 
     return [
         {
@@ -149,7 +195,6 @@ def get_opportunities(db: Session = Depends(get_db)):
                 if skill.strip()
             ],
         }
-
         for opportunity in opportunities
     ]
 
@@ -162,7 +207,14 @@ def create_opportunity(
     opportunity_data: dict,
     db: Session = Depends(get_db),
 ):
-    required_fields = ["title","company","type","location","description","skills",]
+    required_fields = [
+        "title",
+        "company",
+        "type",
+        "location",
+        "description",
+        "skills",
+    ]
 
     if any(
         field not in opportunity_data
@@ -180,12 +232,12 @@ def create_opportunity(
         skills = ", ".join(str(skill) for skill in skills)
 
     new_opportunity = Opportunity(
-        title= str(opportunity_data["title"]).strip(),
-        company= str(opportunity_data["company"]).strip(),
-        type= str(opportunity_data["type"]).strip(),
-        location= str(opportunity_data["location"]).strip(),
-        description= str(opportunity_data["description"]).strip(),
-        skills= str(skills),
+        title=str(opportunity_data["title"]).strip(),
+        company=str(opportunity_data["company"]).strip(),
+        type=str(opportunity_data["type"]).strip(),
+        location=str(opportunity_data["location"]).strip(),
+        description=str(opportunity_data["description"]).strip(),
+        skills=str(skills),
     )
 
     db.add(new_opportunity)
@@ -198,19 +250,22 @@ def create_opportunity(
         "title": new_opportunity.title,
     }
 
+
 @app.get("/opportunities/{opportunity_id}")
 def get_opportunity_details(
     opportunity_id: int,
-    db: Session = Depends(get_db)
-) :
-    opportunity = db.query(Opportunity).filter(
-        Opportunity.id == opportunity_id
-    ).first()
+    db: Session = Depends(get_db),
+):
+    opportunity = (
+        db.query(Opportunity)
+        .filter(Opportunity.id == opportunity_id)
+        .first()
+    )
 
     if opportunity is None:
         raise HTTPException(
-            status_code=404,
-            detail="Opportunity not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Opportunity not found.",
         )
 
     return {
@@ -227,10 +282,12 @@ def get_opportunity_details(
         ],
     }
 
+
 class ApplicationRequest(BaseModel):
     user_id: int
     opportunity_id: int
     motivation: str
+
 
 @app.post("/applications", status_code=status.HTTP_201_CREATED)
 def apply_for_opportunity(
@@ -266,12 +323,12 @@ def apply_for_opportunity(
         )
 
     new_application = Application(
-        user_id = user.id,
-        opportunity_id= opportunity.id,
+        user_id=user.id,
+        opportunity_id=opportunity.id,
         motivation=motivation,
     )
 
-    try: 
+    try:
         db.add(new_application)
         db.commit()
         db.refresh(new_application)
@@ -286,13 +343,13 @@ def apply_for_opportunity(
             "created_at": new_application.created_at,
         }
 
-    except Exception as e:
+    except Exception:
         db.rollback()
-        logger.exception("Application submission failed: %s", e)
+        logger.exception("Application submission failed")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e),
-    )
+            detail="Application submission failed.",
+        )
 
 
 @app.get("/applications")
@@ -312,11 +369,10 @@ def get_applications(db: Session = Depends(get_db)):
     ]
 
 
-
 @app.post("/match-opportunities")
 def match_opportunities(
     request: MatchRequest,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     opportunities = db.query(Opportunity).all()
 
@@ -328,8 +384,8 @@ def match_opportunities(
 
     if not user_skills:
         raise HTTPException(
-            status_code=400,
-            detail="Please provide at least one skill."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide at least one skill.",
         )
 
     results = []
@@ -341,18 +397,14 @@ def match_opportunities(
             if skill.strip()
         }
 
-        matching_skills = user_skills.intersection(
-            required_skills
-        )
-
+        matching_skills = user_skills.intersection(required_skills)
         missing_skills = required_skills - user_skills
 
-        if required_skills:
-            score = round(
-                len(matching_skills) / len(required_skills) * 100
-            )
-        else:
-            score = 0
+        score = (
+            round(len(matching_skills) / len(required_skills) * 100)
+            if required_skills
+            else 0
+        )
 
         results.append({
             "id": opportunity.id,
@@ -364,12 +416,12 @@ def match_opportunities(
             "skills": opportunity.skills,
             "match_percentage": score,
             "matching_skills": sorted(matching_skills),
-            "missing_skills": sorted(missing_skills)
+            "missing_skills": sorted(missing_skills),
         })
 
     results.sort(
         key=lambda item: item["match_percentage"],
-        reverse=True
+        reverse=True,
     )
 
     return results
@@ -378,14 +430,14 @@ def match_opportunities(
 @app.get("/users/{user_id}/skills")
 def get_user_skills(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
         )
 
     saved_skills = [
@@ -396,22 +448,22 @@ def get_user_skills(
 
     return {
         "user_id": user.id,
-        "skills": saved_skills
-    } 
+        "skills": saved_skills,
+    }
 
 
 @app.put("/users/{user_id}/skills")
 def update_user_skills(
     user_id: int,
     request: SkillsUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         raise HTTPException(
-            status_code=404,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
         )
 
     cleaned_skills = list(dict.fromkeys(
@@ -422,8 +474,8 @@ def update_user_skills(
 
     if not cleaned_skills:
         raise HTTPException(
-            status_code=400,
-            detail="Please provide at least one skill."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide at least one skill.",
         )
 
     user.skills = ", ".join(cleaned_skills)
@@ -435,13 +487,12 @@ def update_user_skills(
         db.rollback()
         logger.exception("Saving user skills failed")
         raise HTTPException(
-            status_code=500,
-            detail="Could not save skills."
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not save skills.",
         )
 
     return {
-        "message": "Skills saved successfully",
+        "message": "Skills saved successfully.",
         "user_id": user.id,
-        "skills": cleaned_skills
+        "skills": cleaned_skills,
     }
-  
