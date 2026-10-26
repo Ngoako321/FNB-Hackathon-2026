@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,9 +18,7 @@ function Opportunities() {
     useEffect(() => {
         const fetchOpportunities = async () => {
             try {
-                const response = await fetch(
-                    "http://127.0.0.1:8000/opportunities"
-                );
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/opportunities`);
 
                 if (!response.ok) {
                     throw new Error("Could not load opportunities.");
@@ -102,17 +99,11 @@ function Opportunities() {
     return (
         <div className="opportunities-page">
             <header className="opportunities-header">
-                <Link
-                    to="/dashboard"
-                    className="opportunities-logo"
-                >
-                    Link<span>U</span>
+                <Link to="/dashboard" className="opportunities-logo">
+                Link<span>U</span>
                 </Link>
 
-                <Link
-                    to="/dashboard"
-                    className="back-link"
-                >
+                <Link to="/dashboard" className="back-link">
                     <FontAwesomeIcon icon={faArrowLeft} />
                     {" "}Back to Dashboard
                 </Link>
@@ -120,29 +111,18 @@ function Opportunities() {
 
             <main className="opportunities-main">
                 <section className="opportunities-intro">
-                    <p className="opportunities-eyebrow">
-                        YOUR NEXT OPPORTUNITY
-                    </p>
+                    <p className="opportunities-eyebrow">YOUR NEXT OPPORTUNITY</p>
 
                     <h1>Find your next opportunity.</h1>
 
-                    <p>
-                        Discover jobs, internships, learnerships and
-                        graduate programmes to help you start your career.
-                    </p>
+                    <p>Discover jobs, internships, learnerships and graduate programmes to help you start your career.</p>
                 </section>
 
                 {/* Search bar */}
                 <section className="opportunities-search">
-                    <FontAwesomeIcon
-                        icon={faMagnifyingGlass}
-                    />
+                    <FontAwesomeIcon icon={faMagnifyingGlass}/>
 
-                    <input
-                        type="text"
-                        placeholder="Search roles, companies or skills..."
-                        value={search}
-                        onChange={(event) =>
+                    <input type="text" placeholder="Search roles, companies or skills..." value={search} onChange={(event) =>
                             setSearch(event.target.value)
                         }
                     />
