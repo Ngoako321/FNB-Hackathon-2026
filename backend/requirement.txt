@@ -5,3 +5,4 @@ pymysql
 python-dotenv
 pydantic
 pwdlib[argon2]
+email-validator
