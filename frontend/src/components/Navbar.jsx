@@ -1,3 +1,4 @@
+import {Link} from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBriefcase, faGraduationCap, faArrowRightToBracket, } from "@fortawesome/free-solid-svg-icons";
 
@@ -9,16 +10,20 @@ function Navbar() {
             </a>
 
             <div className="nav-links">
-                <a href="home">Home</a>
+                <a href="#home">Home</a>
 
-                <a href="#oppportunities"><FontAwesomeIcon icon={faBriefcase} /> {" "}Opportunities</a>
+                <a href="#opportunities"><FontAwesomeIcon icon={faBriefcase} /> {" "}Opportunities</a>
 
                 <a href="#readiness"><FontAwesomeIcon icon={faGraduationCap}/> {" "}Career Readiness</a>
             </div>
 
             <div className="nav-actions">
-                <a href="#login" className="login-link"><FontAwesomeIcon icon={faArrowRightToBracket}/> {" "}Log in</a>
-                <a href="#get-started" className="nav-button">Get Started</a>
+                <Link to="/login" className="login-link">
+                <FontAwesomeIcon icon={faArrowRightToBracket}/> Log in
+                </Link>
+
+                <Link to="/register" className="nav-button"> Get Started
+                </Link>
             </div>
         </nav>
     );

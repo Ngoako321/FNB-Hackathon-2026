@@ -17,7 +17,7 @@ function Hero() {
                 <p className="hero-description">Finding your first opportunity shouldn't be the hardest part of your career. Build your skills, prepare for work and discover opportunities made for you.</p>
 
                 <div className="hero-actions">
-                    <a href = "#opporunities" className="primary-button">Explore Opportunities {" "} <FontAwesomeIcon icon={faArrowRight}/></a>
+                    <a href = "#opportunities" className="primary-button">Explore Opportunities {" "} <FontAwesomeIcon icon={faArrowRight}/></a>
                     <a href="#readiness" className="secondary-button">Build Your Skills</a>
                 </div>
 

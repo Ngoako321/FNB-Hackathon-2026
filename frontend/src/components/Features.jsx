@@ -5,14 +5,14 @@ const features = [
     {
         number: "01",
         title: "Discover opportunities",
-        description: "Explore internships, learnerships, grauduate programmes and entry-level jobs.",
+        description: "Explore internships, learnerships, graduate programmes and entry-level jobs.",
         icon: faBriefcase,
         id: "opportunities",
     },
     {
         number: "02",
         title: "Become work-ready",
-        description: "Develop proessional skills, improve your CV and prepare for interviews.",
+        description: "Develop professional skills, improve your CV and prepare for interviews.",
         icon: faGraduationCap,
         id: "readiness",
     },
@@ -27,9 +27,9 @@ const features = [
 
 function Features() {
     return (
-        <section className="features-section" id="get-started">
+        <section className="features-section">
             <div className="section-heading">
-                <span className="eyeybrow">HOW LINK-U HELPS</span>
+                <span className="eyebrow">HOW LINK-U HELPS</span>
 
                 <h2>More than a job search. <br/>
                 <span>A path forward.</span></h2>

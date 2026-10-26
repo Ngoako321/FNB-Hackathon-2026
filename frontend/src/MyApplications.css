@@ -1,0 +1,175 @@
+
+.my-applications-page {
+    min-height: 100vh;
+    background: #F5F6F8;
+    color: #14213D;
+}
+
+.my-applications-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 7%;
+    background: #FFFFFF;
+    border-bottom: 1px solid #DCE0E8;
+}
+
+.my-applications-logo {
+    color: #14213D;
+    font-size: 25px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.my-applications-logo span {
+    color: #E63946;
+}
+
+.my-applications-back {
+    color: #3A4468;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.my-applications-main {
+    width: min(1000px, 86%);
+    margin: 0 auto;
+    padding: 45px 0;
+}
+
+.my-applications-eyebrow {
+    color: #E63946;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.my-applications-main > h1 {
+    margin: 10px 0;
+    font-size: clamp(30px, 4vw, 40px);
+}
+
+.my-applications-intro {
+    margin-bottom: 30px;
+    color: #6B7280;
+}
+
+.my-applications-list {
+    display: grid;
+    gap: 20px;
+}
+
+.my-application-card,
+.my-applications-empty {
+    padding: 25px;
+    background: #FFFFFF;
+    border: 1px solid #DCE0E8;
+    border-radius: 14px;
+}
+
+.my-application-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.my-application-top h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.my-application-opportunity {
+    color: #6B7280;
+    font-size: 14px;
+}
+
+.application-status {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 20px;
+    background: #FFF3CD;
+    color: #856404;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-approved,
+.status-accepted,
+.status-resolved {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.status-rejected {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.my-application-card h3 {
+    margin: 22px 0 8px;
+    font-size: 15px;
+}
+
+.my-application-motivation {
+    color: #3A4468;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.my-application-date {
+    margin-top: 20px;
+    color: #6B7280;
+    font-size: 13px;
+}
+
+.my-applications-empty {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.my-applications-empty > svg {
+    color: #E63946;
+    font-size: 35px;
+}
+
+.my-applications-empty a {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 12px 18px;
+    background: #E63946;
+    color: #FFFFFF;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.my-applications-error {
+    color: #C1121F;
+}
+
+@media (max-width: 600px) {
+    .my-applications-header {
+        padding: 18px 5%;
+        gap: 15px;
+    }
+
+    .my-applications-back {
+        font-size: 13px;
+    }
+
+    .my-applications-main {
+        width: 90%;
+        padding-top: 30px;
+    }
+
+    .my-application-card {
+        padding: 18px;
+    }
+
+    .my-application-top {
+        flex-direction: column;
+    }
+}
+

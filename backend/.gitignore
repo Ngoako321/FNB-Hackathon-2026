@@ -1,0 +1,31 @@
+
+#environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# virtual environments
+venv/
+.venv/
+env/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+#Ide and editor files
+.vscode/
+.idea/
+
+#logs
+*.log
+
+# local databases
+*.db
+*.sqlite3
